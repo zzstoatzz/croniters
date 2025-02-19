@@ -38,5 +38,7 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("WEEKDAYS", constants::WEEKDAYS.clone())?;
     m.add("MONTHS", constants::MONTHS.clone())?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::timedelta_to_seconds, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::datetime_to_timestamp, m)?)?;
     Ok(())
 }

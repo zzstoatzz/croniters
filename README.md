@@ -360,7 +360,7 @@ Complete feature parity with croniter:
 - Complete test suite port
 
 
-> [!INFO]
+> [!WARNING]
 > Not seeing something important in the roadmap? [Open an issue](https://github.com/zzstoatzz/croniters/issues) and I'll add it!
 
 ## (Planned) Technical Stack

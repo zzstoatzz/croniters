@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::{PyDateTime, PyDelta};
 
 #[pyfunction]
 pub fn is_32bit() -> bool {

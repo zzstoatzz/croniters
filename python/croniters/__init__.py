@@ -82,13 +82,14 @@ EXPRESSIONS = {}
 MARKER = object()
 
 
-def timedelta_to_seconds(td):
+def timedelta_to_seconds(td: datetime.timedelta) -> float:
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
 
 
-def datetime_to_timestamp(d):
+def datetime_to_timestamp(d: datetime.datetime) -> float:
     if d.tzinfo is not None:
-        d = d.replace(tzinfo=None) - d.utcoffset()
+        assert (offset := d.utcoffset()) is not None
+        d = d.replace(tzinfo=None) - offset
 
     return timedelta_to_seconds(d - datetime.datetime(1970, 1, 1))
 
@@ -127,15 +128,15 @@ class croniter:
     # This helps with expanding `*` fields into `lower-upper` ranges. Each item
     # in this tuple maps to the corresponding field index
     RANGES = (
-        (0, 59),
-        (0, 23),
-        (1, 31),
-        (1, 12),
-        (0, 6),
-        (0, 59),
-        (1970, 2099),
+        (0, 59),  # minute
+        (0, 23),  # hour
+        (1, 31),  # day of month
+        (1, 12),  # month
+        (0, 6),  # day of week
+        (0, 59),  # second
+        (1970, 2099),  # year
     )
-    DAYS = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    DAYS = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)  # days in each month
 
     ALPHACONV = (
         {},  # 0: min
@@ -177,7 +178,7 @@ class croniter:
         start_time=None,
         ret_type=float,
         day_or=True,
-        max_years_between_matches=None,
+        max_years_between_matches: int | None = None,
         is_prev=False,
         hash_id=None,
         implement_cron_bug=False,
@@ -188,6 +189,7 @@ class croniter:
         self._day_or = day_or
         self._implement_cron_bug = implement_cron_bug
         self.second_at_beginning = bool(second_at_beginning)
+
         self._expand_from_start_time = expand_from_start_time
 
         if hash_id:
@@ -201,6 +203,9 @@ class croniter:
         )
         if not self._max_years_btw_matches_explicitly_set:
             max_years_between_matches = 50
+        assert max_years_between_matches is not None, (
+            'None cannot be interpreted as an int'
+        )
         self._max_years_between_matches = max(int(max_years_between_matches), 1)
 
         if start_time is None:
@@ -230,9 +235,7 @@ class croniter:
         try:
             return cls.ALPHACONV[index][key]
         except KeyError:
-            raise CroniterNotAlphaError(
-                '[{0}] is not acceptable'.format(' '.join(expressions))
-            )
+            raise CroniterNotAlphaError(f'[{", ".join(expressions)}] is not acceptable')
 
     def get_next(self, ret_type=None, start_time=None, update_current=True):
         if start_time and self._expand_from_start_time:
@@ -257,6 +260,7 @@ class croniter:
     def get_current(self, ret_type=None):
         ret_type = ret_type or self._ret_type
         if issubclass(ret_type, datetime.datetime):
+            assert self.cur is not None
             return self.timestamp_to_datetime(self.cur)
         return self.cur
 
@@ -278,7 +282,7 @@ class croniter:
 
     _datetime_to_timestamp = datetime_to_timestamp  # retrocompat
 
-    def timestamp_to_datetime(self, timestamp, tzinfo=MARKER):
+    def timestamp_to_datetime(self, timestamp: float, tzinfo=MARKER):
         """Converts a UNIX `timestamp` into a `datetime` object."""
         if tzinfo is MARKER:  # allow to give tzinfo=None even if self.tzinfo is set
             tzinfo = self.tzinfo
@@ -297,7 +301,7 @@ class croniter:
             result = datetime.datetime.fromtimestamp(timestamp, tz=tzutc()).replace(
                 tzinfo=None
             )
-        if tzinfo:
+        if isinstance(tzinfo, datetime.tzinfo):
             result = result.replace(tzinfo=UTC_DT).astimezone(tzinfo)
         TIMESTAMP_TO_DT_CACHE[(result, repr(result.tzinfo))] = result
         return result
@@ -371,6 +375,7 @@ class croniter:
             result = self._calc(self.cur, expanded, nth_weekday_of_month, is_prev)
 
         # DST Handling for cron job spanning across days
+        assert self.dst_start_time is not None
         dtstarttime = self._timestamp_to_datetime(self.dst_start_time)
         dtstarttime_utcoffset = dtstarttime.utcoffset() or datetime.timedelta(0)
         dtresult = self.timestamp_to_datetime(result)
@@ -379,6 +384,7 @@ class croniter:
         dtresult_utcoffset = dtstarttime_utcoffset
         if dtresult and self.tzinfo:
             dtresult_utcoffset = dtresult.utcoffset()
+            assert dtresult_utcoffset is not None
             lag_hours = self._timedelta_to_seconds(dtresult - dtstarttime) / (60 * 60)
             lag = self._timedelta_to_seconds(dtresult_utcoffset - dtstarttime_utcoffset)
         hours_before_midnight = 24 - dtstarttime.hour
@@ -452,7 +458,7 @@ class croniter:
 
     __next__ = next = _get_next
 
-    def _calc(self, now, expanded, nth_weekday_of_month, is_prev):
+    def _calc(self, now, expanded, nth_weekday_of_month, is_prev):  # noqa: C901
         if is_prev:
             now = math.ceil(now)
             nearest_diff_method = self._get_prev_nearest_diff
@@ -799,7 +805,7 @@ class croniter:
         return val
 
     @classmethod
-    def _expand(
+    def _expand(  # noqa: C901
         cls,
         expr_format,
         hash_id=None,
@@ -892,7 +898,7 @@ class croniter:
                 # Example: in the minute field, "*/5" normalizes to "0-59/5"
                 t = re.sub(
                     r'^\*(\/.+)$',
-                    r'%d-%d\1'
+                    r'%d-%d\1'  # noqa: UP031
                     % (cls.RANGES[field_index][0], cls.RANGES[field_index][1]),
                     str(e),
                 )
@@ -904,7 +910,8 @@ class croniter:
                     # Example: in the minute field, "10/5" normalizes to "10-59/5"
                     t = re.sub(
                         r'^(.+)\/(.+)$',
-                        r'\1-%d/\2' % (cls.RANGES[field_index][1]),
+                        r'\1-%d/\2'  # noqa: UP031
+                        % (cls.RANGES[field_index][1]),
                         str(e),
                     )
                     m = step_search_re.search(t)
@@ -1065,7 +1072,7 @@ class croniter:
         cls,
         expr_format,
         hash_id=None,
-        second_at_beginning=False,
+        second_at_beginning: bool | None = False,
         from_timestamp=None,
     ):
         """Expand a cron expression format into a noramlized format of

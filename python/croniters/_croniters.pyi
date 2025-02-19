@@ -25,4 +25,4 @@ def is_32bit() -> bool:
     Returns:
         True if running on 32-bit Python, False for 64-bit.
     """
-    pass
+    ...
