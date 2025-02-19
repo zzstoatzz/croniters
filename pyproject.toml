@@ -15,7 +15,7 @@ dependencies = ["python_dateutil", "pytz>2021.1"]
 
 
 [dependency-groups]
-dev = ["ipython", "maturin", "pytest", "ruff"]
+dev = ["ipython", "maturin", "pytest", "ruff", "pytest-benchmark", "croniter"]
 
 [tool.maturin]
 python-source = "python"
