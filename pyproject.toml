@@ -1,0 +1,55 @@
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "croniters"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+dependencies = ["python_dateutil", "pytz>2021.1"]
+
+
+[project.optional-dependencies]
+dev = ["ipython", "maturin", "pytest", "ruff"]
+
+[tool.maturin]
+python-source = "python"
+module-name = "croniters._croniters"
+bindings = "pyo3"
+features = ["pyo3/extension-module"]
+
+
+[tool.ruff]
+target-version = "py39"
+include = ["python/**/*.py", "tests/**/*.py"]
+
+[tool.ruff.lint]
+extend-select = ["Q", "RUF100", "C90", "UP", "I", "D"]
+flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
+isort = { combine-as-imports = true, known-first-party = ["rspyai"] }
+mccabe = { max-complexity = 15 }
+ignore = [
+    "D100", # ignore missing docstring in module
+    "D101", # ignore missing docstring in class
+    "D102", # ignore missing docstring in public method
+    "D103", # ignore missing docstring in public function
+    "D104", # ignore missing docstring in public package
+    "D105", # ignore missing docstring in magic methods
+    "D107", # ignore missing docstring in __init__ methods
+    "D205", # ignore missing blank line
+    "D415", # ignore missing period in docstring
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]

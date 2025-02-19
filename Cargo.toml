@@ -1,0 +1,16 @@
+[package]
+name = "croniters"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "_croniters"
+crate-type = ["cdylib"]
+
+[features]
+# must be enabled when building with `cargo build`, maturin enables this automatically
+extension-module = ["pyo3/extension-module"]
+
+[dependencies]
+pyo3 = "0.23.3"
