@@ -40,6 +40,12 @@ pub static DOW_ALPHAS: LazyLock<HashMap<&'static str, i32>> = LazyLock::new(|| {
     ])
 });
 
+pub static WEEKDAYS: LazyLock<String> =
+    LazyLock::new(|| DOW_ALPHAS.keys().map(|k| k.to_string()).collect());
+
+pub static MONTHS: LazyLock<String> =
+    LazyLock::new(|| M_ALPHAS.keys().map(|k| k.to_string()).collect());
+
 pub const UNIX_FIELDS: [i32; 5] = [MINUTE_FIELD, HOUR_FIELD, DAY_FIELD, MONTH_FIELD, DOW_FIELD];
 
 pub const SECOND_FIELDS: [i32; 6] = [

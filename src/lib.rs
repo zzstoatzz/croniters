@@ -1,10 +1,11 @@
 use pyo3::prelude::*;
 
 mod constants;
-
+mod utils;
 /// A Python module implemented in Rust.
 #[pymodule]
 fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     m.add("MINUTE_FIELD", constants::MINUTE_FIELD)?;
     m.add("HOUR_FIELD", constants::HOUR_FIELD)?;
     m.add("DAY_FIELD", constants::DAY_FIELD)?;
@@ -18,5 +19,8 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("SECOND_FIELDS", constants::SECOND_FIELDS)?;
     m.add("YEAR_FIELDS", constants::YEAR_FIELDS)?;
     m.add("CRON_FIELDS", constants::CRON_FIELDS.clone())?;
+    m.add("WEEKDAYS", constants::WEEKDAYS.clone())?;
+    m.add("MONTHS", constants::MONTHS.clone())?;
+    m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
     Ok(())
 }

@@ -1,19 +1,29 @@
 # croniters
 
-A fast, Rust-powered cron expression parser and iterator for Python.
+a fast, rust-powered cron expression parser and iterator for Python.
 
 ## Overview
 
-`croniters` is a drop-in replacement for the Python `croniter` package, implemented in Rust using the battle-tested `cron` crate. It provides efficient cron expression parsing and iteration while maintaining API compatibility with `croniter`.
+`croniters` intends to be a drop-in replacement for the python [`croniter`](https://github.com/kiorky/croniter) package, implemented in Rust.
+
+> [!IMPORTANT]
+> I say "intends to" because while the test suite is ported and should cover the majority of cases, there may be subtle differences between rust and python implementations.
+
 
 ## Why?
+`croniter` is no longer maintained and everyone vendoring means more collective toil.
 
-- **Performance**: Rust implementation provides significant performance improvements
-- **Reliability**: Built on proven Rust crates (`cron` and `chrono`)
-- **Compatibility**: Drop-in replacement for `croniter`
-- **Maintenance**: Simpler codebase by leveraging existing Rust ecosystem
+rust already has good datetime support and rust types are great for this sort of pedantry.
 
-## Implementation Plan
+## Project Roadmap
+
+- port everything to rust incrementally, maintaining the public `croniter` API.
+- consider deprecating things that don't make coherent sense.
+
+### Phase 0: Setup
+- [x] get pyo3 setup
+- [x] port test suite from croniter
+- [ ] move constants and simple utils to rust
 
 ### Phase 1: Core Functionality
 
@@ -41,20 +51,15 @@ Complete feature parity with croniter:
 - Full timezone support
 - Complete test suite port
 
-## Technical Stack
+## (Planned) Technical Stack
 
 - **Cron Parsing**: `cron` crate
-- **DateTime Handling**: `chrono` crate
 - **Python Bindings**: `pyo3`
 - **Build System**: `maturin`
 
-## Development Status
-
-🚧 Currently in early development
-
 ## Contributing
 
-Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Please do - I am only learning rust and pyo3! See the [justfile](justfile) for details on running locally.
 
 ## License
 
