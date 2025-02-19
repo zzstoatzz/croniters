@@ -50,7 +50,7 @@ dependencies = [
     { name = "pytz" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "ipython", version = "8.12.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "ipython", version = "8.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
@@ -62,12 +62,16 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ipython", marker = "extra == 'dev'" },
-    { name = "maturin", marker = "extra == 'dev'" },
-    { name = "pytest", marker = "extra == 'dev'" },
     { name = "python-dateutil" },
     { name = "pytz", specifier = ">2021.1" },
-    { name = "ruff", marker = "extra == 'dev'" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "ipython" },
+    { name = "maturin" },
+    { name = "pytest" },
+    { name = "ruff" },
 ]
 
 [[package]]
