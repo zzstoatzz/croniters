@@ -18,6 +18,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzutc
 
 from ._croniters import (
+    CRON_FIELDS,
     DAY_FIELD,
     DOW_ALPHAS,
     DOW_FIELD,
@@ -106,14 +107,6 @@ hash_expression_re = re.compile(
     r'^(?P<hash_type>h|r)(\((?P<range_begin>\d+)-(?P<range_end>\d+)\))?(\/(?P<divisor>\d+))?$'
 )
 
-CRON_FIELDS = {
-    'unix': UNIX_FIELDS,
-    'second': SECOND_FIELDS,
-    'year': YEAR_FIELDS,
-    len(UNIX_FIELDS): UNIX_FIELDS,
-    len(SECOND_FIELDS): SECOND_FIELDS,
-    len(YEAR_FIELDS): YEAR_FIELDS,
-}
 UNIX_CRON_LEN = len(UNIX_FIELDS)
 SECOND_CRON_LEN = len(SECOND_FIELDS)
 YEAR_CRON_LEN = len(YEAR_FIELDS)

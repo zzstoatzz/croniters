@@ -17,5 +17,6 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("UNIX_FIELDS", constants::UNIX_FIELDS)?;
     m.add("SECOND_FIELDS", constants::SECOND_FIELDS)?;
     m.add("YEAR_FIELDS", constants::YEAR_FIELDS)?;
+    m.add("CRON_FIELDS", constants::CRON_FIELDS.clone())?;
     Ok(())
 }
