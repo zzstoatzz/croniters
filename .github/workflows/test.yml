@@ -71,11 +71,9 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
-          cache-dependency-glob: "pyproject.toml"
 
-      - name: Install packages
-        run: uvx maturin develop --uv && uv sync --dev
+      - name: Compile rust and build python package
+        run: uvx maturin develop --uv
 
       - name: Run tests
-        run: |
-          uv run pytest
+        run: uv run --frozen pytest

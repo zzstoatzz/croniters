@@ -1,10 +1,27 @@
 use pyo3::prelude::*;
+use std::sync::OnceLock;
 
 mod constants;
+mod utils;
 
-/// A Python module implemented in Rust.
+pub fn get_croniters_version() -> &'static str {
+    static CRONITERS_VERSION: OnceLock<String> = OnceLock::new();
+
+    CRONITERS_VERSION.get_or_init(|| {
+        // thank you pydantic-core for the snippet
+        let version = env!("CARGO_PKG_VERSION");
+        // cargo uses "1.0-alpha1" etc. while python uses "1.0.0a1", this is not full compatibility,
+        // but it's good enough for now
+        // see https://docs.rs/semver/1.0.9/semver/struct.Version.html#method.parse for rust spec
+        // see https://peps.python.org/pep-0440/ for python spec
+        // it seems the dot after "alpha/beta" e.g. "-alpha.1" is not necessary, hence why this works
+        version.replace("-alpha", "a").replace("-beta", "b")
+    })
+}
+
 #[pymodule]
 fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add("__version__", get_croniters_version())?;
     m.add("MINUTE_FIELD", constants::MINUTE_FIELD)?;
     m.add("HOUR_FIELD", constants::HOUR_FIELD)?;
     m.add("DAY_FIELD", constants::DAY_FIELD)?;
@@ -17,5 +34,9 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("UNIX_FIELDS", constants::UNIX_FIELDS)?;
     m.add("SECOND_FIELDS", constants::SECOND_FIELDS)?;
     m.add("YEAR_FIELDS", constants::YEAR_FIELDS)?;
+    m.add("CRON_FIELDS", constants::CRON_FIELDS.clone())?;
+    m.add("WEEKDAYS", constants::WEEKDAYS.clone())?;
+    m.add("MONTHS", constants::MONTHS.clone())?;
+    m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
     Ok(())
 }

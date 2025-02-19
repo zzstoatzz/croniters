@@ -3,10 +3,8 @@ import calendar
 import copy
 import datetime
 import math
-import platform
 import random
 import re
-import struct
 import sys
 import traceback as _traceback
 from time import time
@@ -18,6 +16,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzutc
 
 from ._croniters import (
+    CRON_FIELDS,
     DAY_FIELD,
     DOW_ALPHAS,
     DOW_FIELD,
@@ -30,43 +29,11 @@ from ._croniters import (
     UNIX_FIELDS,
     YEAR_FIELD,
     YEAR_FIELDS,
+    __version__,
+    is_32bit,
 )
 
-
-def is_32bit():
-    """Detect if Python is running in 32-bit mode.
-    Compatible with Python 2.6 and later versions.
-    Returns True if running on 32-bit Python, False for 64-bit.
-    """
-    # Method 1: Check pointer size
-    bits = struct.calcsize('P') * 8
-
-    # Method 2: Check platform architecture string
-    try:
-        architecture = platform.architecture()[0]
-    except RuntimeError:
-        architecture = None
-
-    # Method 3: Check maxsize (sys.maxint in Python 2)
-    try:
-        # Python 2
-        is_small_maxsize = sys.maxint <= 2**32
-    except AttributeError:
-        # Python 3
-        is_small_maxsize = sys.maxsize <= 2**32
-
-    # Evaluate all available methods
-    is_32 = False
-
-    if bits == 32:
-        is_32 = True
-    elif architecture and '32' in architecture:
-        is_32 = True
-    elif is_small_maxsize:
-        is_32 = True
-
-    return is_32
-
+VERSION = __version__
 
 try:
     # https://github.com/python/cpython/issues/101069 detection
@@ -89,7 +56,6 @@ except AttributeError:
     UTC_DT = pytz.utc
 EPOCH = datetime.datetime.fromtimestamp(0, UTC_DT)
 
-# fmt: on
 
 step_search_re = re.compile(r'^([^-]+)-([^-/]+)(/(\d+))?$')
 only_int_re = re.compile(r'^\d+$')
@@ -106,14 +72,6 @@ hash_expression_re = re.compile(
     r'^(?P<hash_type>h|r)(\((?P<range_begin>\d+)-(?P<range_end>\d+)\))?(\/(?P<divisor>\d+))?$'
 )
 
-CRON_FIELDS = {
-    'unix': UNIX_FIELDS,
-    'second': SECOND_FIELDS,
-    'year': YEAR_FIELDS,
-    len(UNIX_FIELDS): UNIX_FIELDS,
-    len(SECOND_FIELDS): SECOND_FIELDS,
-    len(YEAR_FIELDS): YEAR_FIELDS,
-}
 UNIX_CRON_LEN = len(UNIX_FIELDS)
 SECOND_CRON_LEN = len(SECOND_FIELDS)
 YEAR_CRON_LEN = len(YEAR_FIELDS)

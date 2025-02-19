@@ -15,7 +15,7 @@ dependencies = ["python_dateutil", "pytz>2021.1"]
 
 
 [dependency-groups]
-dev = ["ipython", "maturin", "pytest", "ruff"]
+dev = ["ipython", "maturin", "pytest", "ruff", "pytest-benchmark", "croniter"]
 
 [tool.maturin]
 python-source = "python"
@@ -31,7 +31,7 @@ include = ["python/**/*.py", "tests/**/*.py"]
 [tool.ruff.lint]
 extend-select = ["Q", "RUF100", "C90", "UP", "I", "D"]
 flake8-quotes = { inline-quotes = "single", multiline-quotes = "double" }
-isort = { combine-as-imports = true, known-first-party = ["rspyai"] }
+isort = { combine-as-imports = true, known-first-party = ["croniters"] }
 mccabe = { max-complexity = 15 }
 ignore = [
     "D100", # ignore missing docstring in module
