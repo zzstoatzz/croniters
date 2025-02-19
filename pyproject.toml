@@ -14,7 +14,7 @@ dynamic = ["version"]
 dependencies = ["python_dateutil", "pytz>2021.1"]
 
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["ipython", "maturin", "pytest", "ruff"]
 
 [tool.maturin]
