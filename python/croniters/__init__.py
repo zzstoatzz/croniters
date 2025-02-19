@@ -29,8 +29,11 @@ from ._croniters import (
     UNIX_FIELDS,
     YEAR_FIELD,
     YEAR_FIELDS,
+    __version__,
     is_32bit,
 )
+
+VERSION = __version__
 
 try:
     # https://github.com/python/cpython/issues/101069 detection
