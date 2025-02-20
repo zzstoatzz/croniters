@@ -14,6 +14,8 @@ DOW_FIELD: int
 SECOND_FIELD: int
 YEAR_FIELD: int
 
+RANGES: list[tuple[int, int]]
+DAYS: list[int]
 M_ALPHAS: dict[str, int]
 DOW_ALPHAS: dict[str, int]
 UNIX_FIELDS: list[int]
@@ -29,6 +31,8 @@ SECOND_CRON_LEN: int
 YEAR_CRON_LEN: int
 
 VALID_LEN_EXPRESSION: set[int]
+
+LEN_MEANS_ALL: list[int]
 
 def is_32bit() -> bool:
     """Detect if Python is running in 32-bit mode.

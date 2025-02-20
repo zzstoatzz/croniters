@@ -77,6 +77,18 @@ pub const YEAR_FIELDS: [i32; 7] = [
     YEAR_FIELD,
 ];
 
+pub const DAYS: [i32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+pub const RANGES: [(i32, i32); 7] = [
+    (0, 59),      // minutes
+    (0, 23),      // hours
+    (1, 31),      // days
+    (1, 12),      // months
+    (0, 6),       // weekdays
+    (0, 59),      // seconds
+    (1970, 2099), // years
+];
+
 #[derive(Eq, Hash, PartialEq, Clone, IntoPyObject)]
 pub enum CronFieldKeyType {
     Str(&'static str),
@@ -113,3 +125,13 @@ pub static VALID_LEN_EXPRESSION: LazyLock<HashSet<usize>> = LazyLock::new(|| {
             .collect::<Vec<_>>(),
     )
 });
+
+pub const LEN_MEANS_ALL: [i32; 7] = [
+    60,  // minutes
+    24,  // hours
+    31,  // days
+    12,  // months
+    7,   // weekdays
+    60,  // seconds
+    130, // years
+];

@@ -6,6 +6,8 @@ use rand::Rng;
 use regex::Regex;
 use std::sync::OnceLock;
 
+use crate::constants::RANGES;
+
 static HASH_EXPRESSION_RE: OnceLock<Regex> = OnceLock::new();
 
 fn get_hash_expression_re() -> &'static Regex {
@@ -30,23 +32,22 @@ impl HashExpander {
     #[pyo3(signature = (idx, hash_type=None, hash_id=None, range_end=None, range_begin=None))]
     fn do_(
         &self,
-        py: Python<'_>,
         idx: i32,
         hash_type: Option<&str>,
         hash_id: Option<&[u8]>,
         range_end: Option<i32>,
         range_begin: Option<i32>,
     ) -> PyResult<i32> {
-        let ranges = self.cron.bind(py).getattr("RANGES")?;
+        let ranges = RANGES;
 
         let range_end = match range_end {
             Some(end) => end,
-            None => ranges.get_item(idx)?.get_item(1)?.extract()?,
+            None => ranges[idx as usize].1,
         };
 
         let range_begin = match range_begin {
             Some(begin) => begin,
-            None => ranges.get_item(idx)?.get_item(0)?.extract()?,
+            None => ranges[idx as usize].0,
         };
 
         let crc = if hash_type == Some("r") {
@@ -134,7 +135,6 @@ impl HashExpander {
                 Ok(format!(
                     "{}-{}/{}",
                     self.do_(
-                        py,
                         idx,
                         Some(&hash_type),
                         hash_id,
@@ -146,7 +146,7 @@ impl HashExpander {
                 ))
             } else {
                 Ok(self
-                    .do_(py, idx, Some(&hash_type), hash_id, Some(end), Some(begin))?
+                    .do_(idx, Some(&hash_type), hash_id, Some(end), Some(begin))?
                     .to_string())
             }
         } else if let Some(divisor) = captures
@@ -158,14 +158,12 @@ impl HashExpander {
                 return Err(PyValueError::new_err(format!("Bad expression: {expr}")));
             }
 
-            let ranges = self.cron.bind(py).getattr("RANGES")?;
-            let range_begin: i32 = ranges.get_item(idx)?.get_item(0)?.extract()?;
-            let range_end: i32 = ranges.get_item(idx)?.get_item(1)?.extract()?;
+            let range_begin: i32 = RANGES[idx as usize].0;
+            let range_end: i32 = RANGES[idx as usize].1;
 
             Ok(format!(
                 "{}-{}/{}",
                 self.do_(
-                    py,
                     idx,
                     Some(&hash_type),
                     hash_id,
@@ -177,7 +175,7 @@ impl HashExpander {
             ))
         } else {
             Ok(self
-                .do_(py, idx, Some(&hash_type), hash_id, None, None)?
+                .do_(idx, Some(&hash_type), hash_id, None, None)?
                 .to_string())
         }
     }

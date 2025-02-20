@@ -17,14 +17,17 @@ from dateutil.tz import tzutc
 from ._croniters import (
     CRON_FIELDS,
     DAY_FIELD,
+    DAYS as DAYS_CONSTANT,
     DOW_ALPHAS,
     DOW_FIELD,
     EXPANDERS,
     HOUR_FIELD,
+    LEN_MEANS_ALL as LEN_MEANS_ALL_CONSTANT,
     M_ALPHAS,
     MINUTE_FIELD,
     MONTH_FIELD,
     MONTHS,
+    RANGES as RANGES_CONSTANT,
     SECOND_CRON_LEN,
     SECOND_FIELD,
     UNIX_CRON_LEN,
@@ -125,16 +128,8 @@ class croniter:
 
     # This helps with expanding `*` fields into `lower-upper` ranges. Each item
     # in this tuple maps to the corresponding field index
-    RANGES = (
-        (0, 59),
-        (0, 23),
-        (1, 31),
-        (1, 12),
-        (0, 6),
-        (0, 59),
-        (1970, 2099),
-    )
-    DAYS = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    RANGES = RANGES_CONSTANT
+    DAYS = DAYS_CONSTANT
 
     ALPHACONV = (
         {},  # 0: min
@@ -160,15 +155,7 @@ class croniter:
         {},
     )
 
-    LEN_MEANS_ALL = (
-        60,
-        24,
-        31,
-        12,
-        7,
-        60,
-        130,
-    )
+    LEN_MEANS_ALL = LEN_MEANS_ALL_CONSTANT
 
     def __init__(
         self,

@@ -46,6 +46,9 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "VALID_LEN_EXPRESSION",
         constants::VALID_LEN_EXPRESSION.clone(),
     )?;
+    m.add("DAYS", constants::DAYS)?;
+    m.add("RANGES", constants::RANGES)?;
+    m.add("LEN_MEANS_ALL", constants::LEN_MEANS_ALL)?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
     m.add_function(wrap_pyfunction!(utils::is_leap, m)?)?;
     m.add_class::<hash_expander::HashExpander>()?;
