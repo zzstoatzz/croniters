@@ -45,5 +45,6 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
         constants::VALID_LEN_EXPRESSION.clone(),
     )?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::is_leap, m)?)?;
     Ok(())
 }

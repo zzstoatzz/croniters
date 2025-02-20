@@ -4,14 +4,14 @@ a port of python's [`croniter`](https://github.com/kiorky/croniter) package in R
 
 
 <details>
-<summary>original usage docs</summary>
+<summary>original usage docs (not my work, but adapted imports)</summary>
 
 Usage
 ============
 
 A simple example::
 
-    >>> from croniter import croniter
+    >>> from croniters import croniter
     >>> from datetime import datetime
     >>> base = datetime(2010, 1, 25, 4, 46)
     >>> iter = croniter('*/5 * * * *', base)  # every 5 minutes
@@ -315,13 +315,13 @@ What they evaluate to depends on whether you supply hash_id: no hash_id correspo
 `croniters` intends to be a drop-in replacement for the python [`croniter`](https://github.com/kiorky/croniter) package, implemented in Rust.
 
 > [!IMPORTANT]
-> I say "intends to" because while the test suite is ported and should cover the majority of cases, there may be subtle differences between rust and python implementations.
+> I say "intends to" because while the test suite is completely ported and should cover the majority of cases, its possible that subtle differences in behavior between rust and python implementations exist that are not covered by the test suite.
 
 
 ## Why?
 `croniter` is no longer maintained and everyone vendoring means more collective toil.
 
-rust already has good datetime support and rust types are great for this sort of pedantry.
+rust already has good datetime support and rust types should be good for this sort of pedantry.
 
 ## Project Roadmap
 

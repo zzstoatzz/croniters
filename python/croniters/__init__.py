@@ -7,6 +7,7 @@ import random
 import re
 import sys
 import traceback as _traceback
+import warnings
 from time import time
 
 # as pytz is optional in thirdparty libs but we need it for good support under
@@ -34,6 +35,7 @@ from ._croniters import (
     YEAR_FIELD,
     __version__,
     is_32bit,
+    is_leap,
 )
 
 VERSION = __version__
@@ -84,7 +86,8 @@ def timedelta_to_seconds(td: datetime.timedelta) -> float:
 
 def datetime_to_timestamp(d: datetime.datetime) -> float:
     if d.tzinfo is not None:
-        d = d.replace(tzinfo=None) - d.utcoffset()
+        if (offset := d.utcoffset()) is not None:
+            d = d.replace(tzinfo=None) - offset
 
     return timedelta_to_seconds(d - datetime.datetime(1970, 1, 1))
 
@@ -510,7 +513,7 @@ class croniter:
                     if is_prev:
                         d += relativedelta(months=diff_month)
                         reset_day = DAYS[d.month - 1]
-                        if d.month == 2 and self.is_leap(d.year) is True:
+                        if d.month == 2 and is_leap(d.year) is True:
                             reset_day += 1
                         d += relativedelta(day=reset_day, hour=23, minute=59, second=59)
                     else:
@@ -525,7 +528,7 @@ class croniter:
                 expanded[DAY_FIELD].index('*')
             except ValueError:
                 days = DAYS[month - 1]
-                if month == 2 and self.is_leap(year) is True:
+                if month == 2 and is_leap(year) is True:
                     days += 1
                 if 'l' in expanded[DAY_FIELD] and days == d.day:
                     return False, d
@@ -595,7 +598,7 @@ class croniter:
                     d += relativedelta(days=-d.day, hour=23, minute=59, second=59)
                 else:
                     days = DAYS[month - 1]
-                    if month == 2 and self.is_leap(year) is True:
+                    if month == 2 and is_leap(year) is True:
                         days += 1
                     d += relativedelta(
                         days=(days - d.day + 1), hour=0, minute=0, second=0
@@ -767,8 +770,12 @@ class croniter:
         return tuple(i[0] for i in c)
 
     @staticmethod
-    def is_leap(year):
-        return bool(year % 400 == 0 or (year % 4 == 0 and year % 100 != 0))
+    def is_leap(year: int) -> bool:
+        warnings.warn(
+            'is_leap is deprecated. use `from croniters import is_leap` instead.',
+            DeprecationWarning,
+        )
+        return is_leap(year)
 
     @classmethod
     def value_alias(cls, val, field_index, len_expressions=UNIX_CRON_LEN):

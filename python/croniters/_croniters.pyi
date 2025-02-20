@@ -37,3 +37,11 @@ def is_32bit() -> bool:
         True if running on 32-bit Python, False for 64-bit.
     """
     pass
+
+def is_leap(year: int) -> bool:
+    """Check if a year is a leap year.
+
+    Args:
+        year: The year to check.
+    """
+    pass
