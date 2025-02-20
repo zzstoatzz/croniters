@@ -22,3 +22,8 @@ pub fn is_32bit() -> bool {
 
     bits == 32 || matches!(arch, "x86" | "arm" | "mips" | "powerpc") || is_maxsize_small
 }
+
+#[pyfunction]
+pub fn is_leap(year: i32) -> bool {
+    year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)
+}

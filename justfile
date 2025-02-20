@@ -26,7 +26,7 @@ build-and-test:
     uv run --frozen pytest
 
 compare-with-the-original:
-    uv run --script pytest compare.py
+    uv run pytest compare.py
 
 
 # TODO: consider these for GHA (https://just.systems/man/en/github-actions.html)

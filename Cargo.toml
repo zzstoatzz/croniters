@@ -13,4 +13,8 @@ crate-type = ["cdylib"]
 extension-module = ["pyo3/extension-module"]
 
 [dependencies]
+chrono = "0.4.39"
+crc32fast = "1.4.2"
 pyo3 = "0.23.3"
+rand = "0.9.0"
+regex = "1.11.1"

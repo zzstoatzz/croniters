@@ -1,7 +1,9 @@
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use std::sync::OnceLock;
 
 mod constants;
+mod hash_expander;
 mod utils;
 
 pub fn get_croniters_version() -> &'static str {
@@ -37,6 +39,24 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("CRON_FIELDS", constants::CRON_FIELDS.clone())?;
     m.add("WEEKDAYS", constants::WEEKDAYS.clone())?;
     m.add("MONTHS", constants::MONTHS.clone())?;
+    m.add("UNIX_CRON_LEN", constants::UNIX_CRON_LEN)?;
+    m.add("SECOND_CRON_LEN", constants::SECOND_CRON_LEN)?;
+    m.add("YEAR_CRON_LEN", constants::YEAR_CRON_LEN)?;
+    m.add(
+        "VALID_LEN_EXPRESSION",
+        constants::VALID_LEN_EXPRESSION.clone(),
+    )?;
+    m.add("DAYS", constants::DAYS)?;
+    m.add("RANGES", constants::RANGES)?;
+    m.add("LEN_MEANS_ALL", constants::LEN_MEANS_ALL)?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
+    m.add_function(wrap_pyfunction!(utils::is_leap, m)?)?;
+    m.add_class::<hash_expander::HashExpander>()?;
+
+    let py = m.py();
+    let expanders = PyDict::new(py);
+    expanders.set_item("hash", py.get_type::<hash_expander::HashExpander>())?;
+    m.add("EXPANDERS", expanders)?;
+
     Ok(())
 }

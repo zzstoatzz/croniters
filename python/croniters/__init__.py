@@ -1,12 +1,11 @@
-import binascii
 import calendar
 import copy
 import datetime
 import math
-import random
 import re
 import sys
 import traceback as _traceback
+import warnings
 from time import time
 
 # as pytz is optional in thirdparty libs but we need it for good support under
@@ -18,25 +17,33 @@ from dateutil.tz import tzutc
 from ._croniters import (
     CRON_FIELDS,
     DAY_FIELD,
+    DAYS as DAYS_CONSTANT,
     DOW_ALPHAS,
     DOW_FIELD,
+    EXPANDERS,
     HOUR_FIELD,
+    LEN_MEANS_ALL as LEN_MEANS_ALL_CONSTANT,
     M_ALPHAS,
     MINUTE_FIELD,
     MONTH_FIELD,
+    MONTHS,
+    RANGES as RANGES_CONSTANT,
+    SECOND_CRON_LEN,
     SECOND_FIELD,
-    SECOND_FIELDS,
-    UNIX_FIELDS,
+    UNIX_CRON_LEN,
+    VALID_LEN_EXPRESSION,
+    WEEKDAYS,
+    YEAR_CRON_LEN,
     YEAR_FIELD,
-    YEAR_FIELDS,
+    HashExpander,  # noqa: F401 # for backwards compatibility
     __version__,
     is_32bit,
+    is_leap,
 )
 
 VERSION = __version__
 
 try:
-    # https://github.com/python/cpython/issues/101069 detection
     if is_32bit():
         datetime.datetime.fromtimestamp(3999999999)
     OVERFLOW32B_MODE = False
@@ -60,8 +67,6 @@ EPOCH = datetime.datetime.fromtimestamp(0, UTC_DT)
 step_search_re = re.compile(r'^([^-]+)-([^-/]+)(/(\d+))?$')
 only_int_re = re.compile(r'^\d+$')
 
-WEEKDAYS = '|'.join(DOW_ALPHAS.keys())
-MONTHS = '|'.join(M_ALPHAS.keys())
 star_or_int_re = re.compile(r'^(\d+|\*)$')
 special_dow_re = re.compile(
     (rf'^(?P<pre>((?P<he>(({WEEKDAYS})(-({WEEKDAYS}))?)')
@@ -72,23 +77,20 @@ hash_expression_re = re.compile(
     r'^(?P<hash_type>h|r)(\((?P<range_begin>\d+)-(?P<range_end>\d+)\))?(\/(?P<divisor>\d+))?$'
 )
 
-UNIX_CRON_LEN = len(UNIX_FIELDS)
-SECOND_CRON_LEN = len(SECOND_FIELDS)
-YEAR_CRON_LEN = len(YEAR_FIELDS)
 # retrocompat
-VALID_LEN_EXPRESSION = set(a for a in CRON_FIELDS if isinstance(a, int))
 TIMESTAMP_TO_DT_CACHE = {}
 EXPRESSIONS = {}
 MARKER = object()
 
 
-def timedelta_to_seconds(td):
+def timedelta_to_seconds(td: datetime.timedelta) -> float:
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
 
 
-def datetime_to_timestamp(d):
+def datetime_to_timestamp(d: datetime.datetime) -> float:
     if d.tzinfo is not None:
-        d = d.replace(tzinfo=None) - d.utcoffset()
+        if (offset := d.utcoffset()) is not None:
+            d = d.replace(tzinfo=None) - offset
 
     return timedelta_to_seconds(d - datetime.datetime(1970, 1, 1))
 
@@ -126,16 +128,8 @@ class croniter:
 
     # This helps with expanding `*` fields into `lower-upper` ranges. Each item
     # in this tuple maps to the corresponding field index
-    RANGES = (
-        (0, 59),
-        (0, 23),
-        (1, 31),
-        (1, 12),
-        (0, 6),
-        (0, 59),
-        (1970, 2099),
-    )
-    DAYS = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+    RANGES = RANGES_CONSTANT
+    DAYS = DAYS_CONSTANT
 
     ALPHACONV = (
         {},  # 0: min
@@ -161,15 +155,7 @@ class croniter:
         {},
     )
 
-    LEN_MEANS_ALL = (
-        60,
-        24,
-        31,
-        12,
-        7,
-        60,
-        130,
-    )
+    LEN_MEANS_ALL = LEN_MEANS_ALL_CONSTANT
 
     def __init__(
         self,
@@ -514,7 +500,7 @@ class croniter:
                     if is_prev:
                         d += relativedelta(months=diff_month)
                         reset_day = DAYS[d.month - 1]
-                        if d.month == 2 and self.is_leap(d.year) is True:
+                        if d.month == 2 and is_leap(d.year) is True:
                             reset_day += 1
                         d += relativedelta(day=reset_day, hour=23, minute=59, second=59)
                     else:
@@ -529,7 +515,7 @@ class croniter:
                 expanded[DAY_FIELD].index('*')
             except ValueError:
                 days = DAYS[month - 1]
-                if month == 2 and self.is_leap(year) is True:
+                if month == 2 and is_leap(year) is True:
                     days += 1
                 if 'l' in expanded[DAY_FIELD] and days == d.day:
                     return False, d
@@ -599,7 +585,7 @@ class croniter:
                     d += relativedelta(days=-d.day, hour=23, minute=59, second=59)
                 else:
                     days = DAYS[month - 1]
-                    if month == 2 and self.is_leap(year) is True:
+                    if month == 2 and is_leap(year) is True:
                         days += 1
                     d += relativedelta(
                         days=(days - d.day + 1), hour=0, minute=0, second=0
@@ -771,8 +757,12 @@ class croniter:
         return tuple(i[0] for i in c)
 
     @staticmethod
-    def is_leap(year):
-        return bool(year % 400 == 0 or (year % 4 == 0 and year % 100 != 0))
+    def is_leap(year: int) -> bool:
+        warnings.warn(
+            'is_leap is deprecated. use `from croniters import is_leap` instead.',
+            DeprecationWarning,
+        )
+        return is_leap(year)
 
     @classmethod
     def value_alias(cls, val, field_index, len_expressions=UNIX_CRON_LEN):
@@ -1270,98 +1260,3 @@ def croniter_range(
     except CroniterBadDateError:
         # Stop iteration when this exception is raised; no match found within the given year range
         return
-
-
-class HashExpander:
-    def __init__(self, cronit):
-        self.cron = cronit
-
-    def do(self, idx, hash_type='h', hash_id=None, range_end=None, range_begin=None):
-        """Return a hashed/random integer given range/hash information"""
-        if range_end is None:
-            range_end = self.cron.RANGES[idx][1]
-        if range_begin is None:
-            range_begin = self.cron.RANGES[idx][0]
-        if hash_type == 'r':
-            crc = random.randint(0, 0xFFFFFFFF)
-        else:
-            crc = binascii.crc32(hash_id) & 0xFFFFFFFF
-        return ((crc >> idx) % (range_end - range_begin + 1)) + range_begin
-
-    def match(self, efl, idx, expr, hash_id=None, **kw):
-        return hash_expression_re.match(expr)
-
-    def expand(self, efl, idx, expr, hash_id=None, match='', **kw):
-        """Expand a hashed/random expression to its normal representation"""
-        if match == '':
-            match = self.match(efl, idx, expr, hash_id, **kw)
-        if not match:
-            return expr
-        m = match.groupdict()
-
-        if m['hash_type'] == 'h' and hash_id is None:
-            raise CroniterBadCronError('Hashed definitions must include hash_id')
-
-        if m['range_begin'] and m['range_end']:
-            if int(m['range_begin']) >= int(m['range_end']):
-                raise CroniterBadCronError('Range end must be greater than range begin')
-
-        if m['range_begin'] and m['range_end'] and m['divisor']:
-            # Example: H(30-59)/10 -> 34-59/10 (i.e. 34,44,54)
-            if int(m['divisor']) == 0:
-                raise CroniterBadCronError(f'Bad expression: {expr}')
-
-            return '{0}-{1}/{2}'.format(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_begin=int(m['range_begin']),
-                    range_end=int(m['divisor']) - 1 + int(m['range_begin']),
-                ),
-                int(m['range_end']),
-                int(m['divisor']),
-            )
-        elif m['range_begin'] and m['range_end']:
-            # Example: H(0-29) -> 12
-            return str(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_end=int(m['range_end']),
-                    range_begin=int(m['range_begin']),
-                )
-            )
-        elif m['divisor']:
-            # Example: H/15 -> 7-59/15 (i.e. 7,22,37,52)
-            if int(m['divisor']) == 0:
-                raise CroniterBadCronError(f'Bad expression: {expr}')
-
-            return '{0}-{1}/{2}'.format(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_begin=self.cron.RANGES[idx][0],
-                    range_end=int(m['divisor']) - 1 + self.cron.RANGES[idx][0],
-                ),
-                self.cron.RANGES[idx][1],
-                int(m['divisor']),
-            )
-        else:
-            # Example: H -> 32
-            return str(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                )
-            )
-
-
-EXPANDERS = OrderedDict(
-    [
-        ('hash', HashExpander),
-    ]
-)
