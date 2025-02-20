@@ -1,5 +1,9 @@
 # croniters
 
+> [!WARNING]
+> This is a side project, and in some cases this may be marginally slower than the python version until the core logic is ported to rust, avoiding superfluous boundary crossing. However, it does pass the entire original test suite on all platforms and is [a drop-in replacement in `prefect`](https://github.com/PrefectHQ/prefect/pull/17184).
+
+
 a port of python's [`croniter`](https://github.com/kiorky/croniter) package in Rust and exposed on PyPI via `pyo3` as [`croniters`](https://pypi.org/project/croniters/).
 
 
