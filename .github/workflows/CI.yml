@@ -10,8 +10,10 @@ on:
     branches:
       - main
     tags:
-      - '*'
+      - 'v*'
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -165,19 +167,13 @@ jobs:
       # Used to generate artifact attestation
       attestations: write
     steps:
-      - name: Get tag version
-        id: get_tag
-        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-      
-      - name: Get Cargo.toml version
-        id: get_cargo
+      - uses: actions/checkout@v4
+      - name: Version Check
         run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
           CARGO_VERSION=$(grep '^version =' Cargo.toml | cut -d '"' -f 2)
-          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
-      
-      - name: Check PyPI
-        run: |
           PYPI_VERSION=$(curl -s https://pypi.org/pypi/croniters/json | jq -r '.info.version')
+          
           if [ "$TAG_VERSION" = "$PYPI_VERSION" ]; then
             echo "Error: Version $TAG_VERSION already exists on PyPI"
             exit 1
@@ -185,7 +181,7 @@ jobs:
           if [ "$TAG_VERSION" != "$CARGO_VERSION" ]; then
             echo "Error: Git tag ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
             exit 1
-          fi 
+          fi
 
       - uses: actions/download-artifact@v4
       - name: Generate artifact attestation

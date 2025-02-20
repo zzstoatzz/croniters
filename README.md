@@ -319,7 +319,7 @@ What they evaluate to depends on whether you supply hash_id: no hash_id correspo
 `croniters` intends to be a drop-in replacement for the python [`croniter`](https://github.com/kiorky/croniter) package, implemented in Rust.
 
 > [!IMPORTANT]
-> I say "intends to" because while the test suite is completely ported and should cover the majority of cases, its possible that subtle differences in behavior between rust and python implementations exist that are not covered by the test suite.
+> I say "intends to" because while the test suite should cover the vast majority of cases important to `croniter` users, it seems likely that subtle differences in behavior between rust and python implementations could eventually exist.
 
 
 ## Why?
@@ -329,43 +329,26 @@ rust already has good datetime support and rust types should be good for this so
 
 ## Project Roadmap
 
-- port everything to rust incrementally, maintaining the public `croniter` API.
-- consider deprecating things that don't make coherent sense.
+- port everything to rust incrementally, maintaining the public `croniter` API
+- minimize boundary crossings between rust and python, using deprecation where necessary
+- make best use of existing rust datetime/cronstring parsing crates
 
 ### Phase 0: Setup
 - [x] get pyo3 setup
-- [x] port test suite from croniter
-- [ ] move constants and simple utils to rust
+- [x] port test suite from croniter and it passes
+- [x] move constants and simple utils to rust
+- [x] basic benchmarking
 
-### Phase 1: Core Functionality
-
-Initial implementation focusing on the most commonly used features:
-
-- Basic cron expression parsing
-- `get_next()`/`get_prev()` methods
-- DateTime/timestamp conversions
-- Support for basic cron formats (5-field Unix cron)
-
-### Phase 2: Extended Features
-
-Add support for:
-
-- Second and year fields (6 and 7-field formats)
-- Hash-based expressions
-- Range iteration (`croniter_range`)
-- All croniter expression aliases (@yearly, @monthly, etc)
-
-### Phase 3: Full Compatibility
-
-Complete feature parity with croniter:
-
-- All edge cases and special syntax
-- Full timezone support
-- Complete test suite port
+### Phase 1: Migrate the `croniter` class itself
+- [ ] get a similarly shaped croniter class to compile
+- [ ] run tests and weep at all the failures
+- [ ] systematically identify disparities and fix them
 
 
 > [!INFO]
-> Not seeing something important in the roadmap? [Open an issue](https://github.com/zzstoatzz/croniters/issues) and I'll add it!
+> Think I'm doing something stupid?
+> 
+> [Drop me a line](https://github.com/zzstoatzz/croniters/issues)! I probably am.
 
 ## (Planned) Technical Stack
 
