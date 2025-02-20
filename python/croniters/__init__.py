@@ -1,9 +1,7 @@
-import binascii
 import calendar
 import copy
 import datetime
 import math
-import random
 import re
 import sys
 import traceback as _traceback
@@ -21,6 +19,7 @@ from ._croniters import (
     DAY_FIELD,
     DOW_ALPHAS,
     DOW_FIELD,
+    EXPANDERS,
     HOUR_FIELD,
     M_ALPHAS,
     MINUTE_FIELD,
@@ -33,6 +32,7 @@ from ._croniters import (
     WEEKDAYS,
     YEAR_CRON_LEN,
     YEAR_FIELD,
+    HashExpander,  # noqa: F401 # for backwards compatibility
     __version__,
     is_32bit,
     is_leap,
@@ -1273,98 +1273,3 @@ def croniter_range(
     except CroniterBadDateError:
         # Stop iteration when this exception is raised; no match found within the given year range
         return
-
-
-class HashExpander:
-    def __init__(self, cronit):
-        self.cron = cronit
-
-    def do(self, idx, hash_type='h', hash_id=None, range_end=None, range_begin=None):
-        """Return a hashed/random integer given range/hash information"""
-        if range_end is None:
-            range_end = self.cron.RANGES[idx][1]
-        if range_begin is None:
-            range_begin = self.cron.RANGES[idx][0]
-        if hash_type == 'r':
-            crc = random.randint(0, 0xFFFFFFFF)
-        else:
-            crc = binascii.crc32(hash_id) & 0xFFFFFFFF
-        return ((crc >> idx) % (range_end - range_begin + 1)) + range_begin
-
-    def match(self, efl, idx, expr, hash_id=None, **kw):
-        return hash_expression_re.match(expr)
-
-    def expand(self, efl, idx, expr, hash_id=None, match='', **kw):
-        """Expand a hashed/random expression to its normal representation"""
-        if match == '':
-            match = self.match(efl, idx, expr, hash_id, **kw)
-        if not match:
-            return expr
-        m = match.groupdict()
-
-        if m['hash_type'] == 'h' and hash_id is None:
-            raise CroniterBadCronError('Hashed definitions must include hash_id')
-
-        if m['range_begin'] and m['range_end']:
-            if int(m['range_begin']) >= int(m['range_end']):
-                raise CroniterBadCronError('Range end must be greater than range begin')
-
-        if m['range_begin'] and m['range_end'] and m['divisor']:
-            # Example: H(30-59)/10 -> 34-59/10 (i.e. 34,44,54)
-            if int(m['divisor']) == 0:
-                raise CroniterBadCronError(f'Bad expression: {expr}')
-
-            return '{0}-{1}/{2}'.format(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_begin=int(m['range_begin']),
-                    range_end=int(m['divisor']) - 1 + int(m['range_begin']),
-                ),
-                int(m['range_end']),
-                int(m['divisor']),
-            )
-        elif m['range_begin'] and m['range_end']:
-            # Example: H(0-29) -> 12
-            return str(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_end=int(m['range_end']),
-                    range_begin=int(m['range_begin']),
-                )
-            )
-        elif m['divisor']:
-            # Example: H/15 -> 7-59/15 (i.e. 7,22,37,52)
-            if int(m['divisor']) == 0:
-                raise CroniterBadCronError(f'Bad expression: {expr}')
-
-            return '{0}-{1}/{2}'.format(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                    range_begin=self.cron.RANGES[idx][0],
-                    range_end=int(m['divisor']) - 1 + self.cron.RANGES[idx][0],
-                ),
-                self.cron.RANGES[idx][1],
-                int(m['divisor']),
-            )
-        else:
-            # Example: H -> 32
-            return str(
-                self.do(
-                    idx,
-                    hash_type=m['hash_type'],
-                    hash_id=hash_id,
-                )
-            )
-
-
-EXPANDERS = OrderedDict(
-    [
-        ('hash', HashExpander),
-    ]
-)

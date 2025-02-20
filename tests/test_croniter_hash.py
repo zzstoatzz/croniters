@@ -134,7 +134,7 @@ def test_hash_invalid_range(hash_setup):
             'H(11-10) H * * *', datetime(2020, 1, 1, 11, 31), timedelta(minutes=10)
         )
     except CroniterBadCronError as ex:
-        assert str(ex) == 'Range end must be greater than range begin'
+        assert 'Range end must be greater than range begin' in str(ex)
 
 
 def test_hash_id_bytes(hash_setup):

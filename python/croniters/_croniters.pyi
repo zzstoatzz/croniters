@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, TypeAlias
+
 __version__: str
 
 MINUTE_FIELD: int
@@ -45,3 +47,36 @@ def is_leap(year: int) -> bool:
         year: The year to check.
     """
     pass
+
+class HashExpander:
+    def __init__(self, cronit: Any) -> None:
+        pass
+
+    def do(
+        self,
+        idx: int,
+        hash_type: str = 'h',
+        hash_id: bytes | None = None,
+        range_end: int | None = None,
+        range_begin: int | None = None,
+    ) -> int:
+        pass
+
+    def match(
+        self, efl: Any, idx: int, expr: str, hash_id: bytes | None = None, **kw: Any
+    ) -> bool:
+        pass
+
+    def expand(
+        self,
+        efl: Any,
+        idx: int,
+        expr: str,
+        hash_id: bytes | None = None,
+        match: str | None = None,
+        **kw: Any,
+    ) -> str:
+        pass
+
+ExpanderType: TypeAlias = HashExpander
+EXPANDERS: dict[str, ExpanderType]

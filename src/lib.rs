@@ -1,7 +1,9 @@
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use std::sync::OnceLock;
 
 mod constants;
+mod hash_expander;
 mod utils;
 
 pub fn get_croniters_version() -> &'static str {
@@ -46,5 +48,12 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     )?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
     m.add_function(wrap_pyfunction!(utils::is_leap, m)?)?;
+    m.add_class::<hash_expander::HashExpander>()?;
+
+    let py = m.py();
+    let expanders = PyDict::new(py);
+    expanders.set_item("hash", py.get_type::<hash_expander::HashExpander>())?;
+    m.add("EXPANDERS", expanders)?;
+
     Ok(())
 }
