@@ -362,7 +362,7 @@ Please do - I am only learning rust and pyo3! See the [justfile](justfile) for d
 
 ## License
 
-Same as croniter - MIT License 
+Same as `croniter` - MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 

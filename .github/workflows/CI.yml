@@ -10,7 +10,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - '*'
   pull_request:
     branches:
       - main
@@ -182,6 +182,10 @@ jobs:
             echo "Error: Git tag ($TAG_VERSION) does not match Cargo.toml version ($CARGO_VERSION)"
             exit 1
           fi
+
+          echo "TAG_VERSION: $TAG_VERSION"
+          echo "CARGO_VERSION: $CARGO_VERSION"
+          echo "PYPI_VERSION: $PYPI_VERSION"
 
       - uses: actions/download-artifact@v4
       - name: Generate artifact attestation
