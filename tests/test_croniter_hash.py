@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import pytest
+
 from croniters import CroniterBadCronError, CroniterNotAlphaError, croniter
 
 

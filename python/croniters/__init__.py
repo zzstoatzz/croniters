@@ -24,11 +24,14 @@ from ._croniters import (
     M_ALPHAS,
     MINUTE_FIELD,
     MONTH_FIELD,
+    MONTHS,
+    SECOND_CRON_LEN,
     SECOND_FIELD,
-    SECOND_FIELDS,
-    UNIX_FIELDS,
+    UNIX_CRON_LEN,
+    VALID_LEN_EXPRESSION,
+    WEEKDAYS,
+    YEAR_CRON_LEN,
     YEAR_FIELD,
-    YEAR_FIELDS,
     __version__,
     is_32bit,
 )
@@ -36,7 +39,6 @@ from ._croniters import (
 VERSION = __version__
 
 try:
-    # https://github.com/python/cpython/issues/101069 detection
     if is_32bit():
         datetime.datetime.fromtimestamp(3999999999)
     OVERFLOW32B_MODE = False
@@ -60,8 +62,6 @@ EPOCH = datetime.datetime.fromtimestamp(0, UTC_DT)
 step_search_re = re.compile(r'^([^-]+)-([^-/]+)(/(\d+))?$')
 only_int_re = re.compile(r'^\d+$')
 
-WEEKDAYS = '|'.join(DOW_ALPHAS.keys())
-MONTHS = '|'.join(M_ALPHAS.keys())
 star_or_int_re = re.compile(r'^(\d+|\*)$')
 special_dow_re = re.compile(
     (rf'^(?P<pre>((?P<he>(({WEEKDAYS})(-({WEEKDAYS}))?)')
@@ -72,21 +72,17 @@ hash_expression_re = re.compile(
     r'^(?P<hash_type>h|r)(\((?P<range_begin>\d+)-(?P<range_end>\d+)\))?(\/(?P<divisor>\d+))?$'
 )
 
-UNIX_CRON_LEN = len(UNIX_FIELDS)
-SECOND_CRON_LEN = len(SECOND_FIELDS)
-YEAR_CRON_LEN = len(YEAR_FIELDS)
 # retrocompat
-VALID_LEN_EXPRESSION = set(a for a in CRON_FIELDS if isinstance(a, int))
 TIMESTAMP_TO_DT_CACHE = {}
 EXPRESSIONS = {}
 MARKER = object()
 
 
-def timedelta_to_seconds(td):
+def timedelta_to_seconds(td: datetime.timedelta) -> float:
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10**6) / 10**6
 
 
-def datetime_to_timestamp(d):
+def datetime_to_timestamp(d: datetime.datetime) -> float:
     if d.tzinfo is not None:
         d = d.replace(tzinfo=None) - d.utcoffset()
 

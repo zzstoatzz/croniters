@@ -37,6 +37,13 @@ fn _croniters(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("CRON_FIELDS", constants::CRON_FIELDS.clone())?;
     m.add("WEEKDAYS", constants::WEEKDAYS.clone())?;
     m.add("MONTHS", constants::MONTHS.clone())?;
+    m.add("UNIX_CRON_LEN", constants::UNIX_CRON_LEN)?;
+    m.add("SECOND_CRON_LEN", constants::SECOND_CRON_LEN)?;
+    m.add("YEAR_CRON_LEN", constants::YEAR_CRON_LEN)?;
+    m.add(
+        "VALID_LEN_EXPRESSION",
+        constants::VALID_LEN_EXPRESSION.clone(),
+    )?;
     m.add_function(wrap_pyfunction!(utils::is_32bit, m)?)?;
     Ok(())
 }

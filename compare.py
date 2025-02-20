@@ -26,8 +26,8 @@ def test_expressions():
 def test_basic_iteration(benchmark: BenchmarkFixture, base_time: datetime):
     def run(module):
         for _ in range(1000):
-            iter = module('0 0 * * *', base_time)
-            iter.get_next(datetime)
+            _iter = module('0 0 * * *', base_time)
+            _iter.get_next(datetime)
 
     benchmark.pedantic(
         run,
@@ -69,10 +69,10 @@ def test_date_range_matching(benchmark: BenchmarkFixture, base_time: datetime):
 
 def test_next_prev_dates(benchmark: BenchmarkFixture, base_time: datetime):
     def run(module):
-        iter = module('0 0 * * *', base_time)
+        _iter = module('0 0 * * *', base_time)
         for _ in range(1000):
-            iter.get_next(datetime)
-            iter.get_prev(datetime)
+            _iter.get_next(datetime)
+            _iter.get_prev(datetime)
 
     benchmark.pedantic(
         run,
@@ -100,9 +100,9 @@ def test_all_operations(
 
     def run():
         # Basic iteration
-        iter = module('0 0 * * *', base_time)
+        _iter = module('0 0 * * *', base_time)
         for _ in range(100):
-            iter.get_next(datetime)
+            _iter.get_next(datetime)
 
         # Expression validation
         for expr in test_expressions * 100:
@@ -113,9 +113,9 @@ def test_all_operations(
             module.match_range('0 * * * *', base_time, end)
 
         # Next/prev dates
-        iter = module('0 0 * * *', base_time)
+        _iter = module('0 0 * * *', base_time)
         for _ in range(100):
-            iter.get_next(datetime)
-            iter.get_prev(datetime)
+            _iter.get_next(datetime)
+            _iter.get_prev(datetime)
 
     benchmark(run)

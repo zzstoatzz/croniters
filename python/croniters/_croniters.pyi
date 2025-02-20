@@ -19,8 +19,19 @@ SECOND_FIELDS: list[int]
 YEAR_FIELDS: list[int]
 CRON_FIELDS: dict[str | int, list[int]]
 
+WEEKDAYS: str
+MONTHS: str
+
+UNIX_CRON_LEN: int
+SECOND_CRON_LEN: int
+YEAR_CRON_LEN: int
+
+VALID_LEN_EXPRESSION: set[int]
+
 def is_32bit() -> bool:
     """Detect if Python is running in 32-bit mode.
+
+    see https://github.com/python/cpython/issues/101069 for details
 
     Returns:
         True if running on 32-bit Python, False for 64-bit.
