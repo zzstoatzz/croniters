@@ -345,7 +345,7 @@ rust already has good datetime support and rust types should be good for this so
 - [ ] systematically identify disparities and fix them
 
 
-> [!INFO]
+> [!NOTE]
 > Think I'm doing something stupid?
 > 
 > [Drop me a line](https://github.com/zzstoatzz/croniters/issues)! I probably am.

@@ -4,13 +4,15 @@ build-backend = "maturin"
 
 [project]
 name = "croniters"
+description = "A port of python's `croniter` package in Rust and exposed on PyPI via `pyo3` as `croniters`."
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dynamic = ["version"]
+dynamic = ["version", "license"]
+
 dependencies = ["python_dateutil", "pytz>2021.1"]
 
 
